@@ -2,21 +2,11 @@ clear all;
 clc;
 
 addpath('Matlab plots\');
+addpath('Matlab plots\Hand-tuning');
 
-%% Inputs to the switches in the Simulink model
-% theta_true = 1 when running P-STSMC controller (otherwise 0)
-theta_true = 1;
-
-% theta_step_true = 1 when running step input for theta_r (0 for sine input)
-theta_step_true = 0;    % doesn't matter when theta_true = 0
-
-% omega_step_true = 1 when running step input for omega_r (0 for sine input)
-omega_step_true = 0;
-
-% Frequency for sine wave
+%% Frequency for reference sine wave
+% Frequency for reference sine wave
 xf = 1;
-
-d_e_mag = 1;
 
 %% Parameters for drive train
 % This is the initialization script for the motor and axle parameters. Both
@@ -50,77 +40,98 @@ k1 = 0.492;
 k2 = 10;
 k_pos = 5;
 
-% From DiffTune
-% k1 = 1.779;
-% k2 = 0.9926;
-% k_pos = 4.213;
-
-% From DiffTune+
-% k1 = 1.779;
-% k2 = 0.9926;
-% k_pos = 4.213;
-
 %% Simulink simulation - STSMC and P-STSMC hand-tuning
-driveTrain_sim = sim('driveTrain_P_STSMC', 10);
-
-% Extracting data
-omega_r_timeseries = driveTrain_sim.omega_r_out;
-theta_r_timeseries = driveTrain_sim.theta_r_out;
-omega_m_timeseries = driveTrain_sim.omega_m_out;
-theta_l_timeseries = driveTrain_sim.theta_l_out;
-
-% Extracting data not as timeseries
-time = omega_r_timeseries.Time;
-omega_r = omega_r_timeseries.Data;
-theta_r = theta_r_timeseries.Data;
-omega_m = omega_m_timeseries.Data;
-theta_l = theta_l_timeseries.Data;
-
-%% Loss and RSME calculations (same as used for DiffTune)
-e_theta = theta_r - theta_l;
-loss_theta = e_theta .^ 2;
-acc_loss_theta = sum(loss_theta);   % accumulated loss
-rmse_theta = sqrt(1/length(time) * acc_loss_theta);
-
-%% Plotting
 h1 = figure(1);
 
-subplot(2,2,[1 2]);
-plot(driveTrain_sim.theta_l_out, 'LineWidth', 1.5);
-hold on;
-plot(driveTrain_sim.theta_r_out, '--', 'LineWidth', 1.5);
+% Amplitude of disturbance sine wave
+% d_e_mags = [0 0.02:0.8:6];
+d_e_mags = 0.02:0.2:1;
+
+% Initialize a cell array to store legend entries
+legend_entries = cell(1, length(d_e_mags));
+
+for i = 1 : length(d_e_mags)
+    % Simulate
+    d_e_mag = d_e_mags(i);
+    driveTrain_sim = sim('driveTrain_P_STSMC', 10);
+
+    % Extracting data
+    omega_r_timeseries = driveTrain_sim.omega_r_out;
+    theta_r_timeseries = driveTrain_sim.theta_r_out;
+    omega_m_timeseries = driveTrain_sim.omega_m_out;
+    theta_l_timeseries = driveTrain_sim.theta_l_out;
+
+    % Extracting data not as timeseries
+    time = omega_r_timeseries.Time;
+    omega_r = omega_r_timeseries.Data;
+    theta_r = theta_r_timeseries.Data;
+    omega_m = omega_m_timeseries.Data;
+    theta_l = theta_l_timeseries.Data;
+
+    % Loss and RSME calculations (same as used for DiffTune)
+    e_theta = theta_r - theta_l;
+    loss_theta = e_theta .^ 2;
+    acc_loss_theta = sum(loss_theta);   % accumulated loss
+    rmse_theta = sqrt(1/length(time) * acc_loss_theta);
+
+    % Error plot
+    plot(time, abs(e_theta)*10^3, 'LineWidth', 1.5);
+    hold on;
+
+    % Store legend entry
+    legend_entries{i} = ['d\_e = ', num2str(d_e_mag), ' sin(t)'];
+end
+
 hold off;
 grid on;
-legend('\theta_l', '\theta_r', 'Location', 'southeast');
-ylim([-1 1]);
-xlabel('time (s)');
-ylabel('position (rad)');
-text(0.5,-0.1,['k1 = ' sprintf('%.3f', k1)]);
-text(0.5,-0.3,['k2 = ' sprintf('%.3f', k2)]);
-text(0.5,-0.5,['k_pos = ' sprintf('%.3f', k_pos)]);
-text(0.5,-0.7,['rmse = ' sprintf('%.4f', rmse_theta)]);
-title('Hand-tuned P-STSMC sine response');
+legend(legend_entries, 'Location', 'northeast');
 
-subplot(2,2,3);
-plot(time, abs(e_theta)*10^3, 'LineWidth', 1.5);
-grid on;
-legend('|e_\theta|', 'Location', 'northeast');
-% ylim([-0.5 6]);
+ylim([0 2]);
 xlabel('time (s)');
 ylabel('position error (mrad)');
-title('Position error');
+title('Position error, |e_\theta|');
 
-subplot(2,2,4);
-plot(driveTrain_sim.T_m_out, 'LineWidth', 1.5);
-grid on;
-legend('T_m = u + d_e', 'Location', 'northeast');
-% ylim([-0.2 1]);
-xlabel('time (s)');
-ylabel('torque (N m)');
-text(4.5,0.35,'d_e = 1 sin(t)');
-title('Motor torque');
+saveas(h1, 'Matlab plots\Hand-tuning\Testing P-STSMC hand-tuning.png');
 
-saveas(h1, 'Matlab plots\Testing P-STSMC hand-tuning 1.png');
+%% Plotting
+% h1 = figure(1);
+% 
+% subplot(2,2,[1 2]);
+% plot(driveTrain_sim.theta_l_out, 'LineWidth', 1.5);
+% hold on;
+% plot(driveTrain_sim.theta_r_out, '--', 'LineWidth', 1.5);
+% hold off;
+% grid on;
+% legend('\theta_l', '\theta_r', 'Location', 'southeast');
+% ylim([-1 1]);
+% xlabel('time (s)');
+% ylabel('position (rad)');
+% text(0.5,-0.1,['k1 = ' sprintf('%.3f', k1)]);
+% text(0.5,-0.3,['k2 = ' sprintf('%.3f', k2)]);
+% text(0.5,-0.5,['k_pos = ' sprintf('%.3f', k_pos)]);
+% text(0.5,-0.7,['rmse = ' sprintf('%.4f', rmse_theta)]);
+% title('Hand-tuned P-STSMC sine response');
+% 
+% subplot(2,2,3);
+% plot(time, abs(e_theta)*10^3, 'LineWidth', 1.5);
+% grid on;
+% legend('|e_\theta|', 'Location', 'northeast');
+% % ylim([-0.5 6]);
+% xlabel('time (s)');
+% ylabel('position error (mrad)');
+% title('Position error');
+% 
+% subplot(2,2,4);
+% plot(driveTrain_sim.T_m_out, 'LineWidth', 1.5);
+% grid on;
+% legend('T_m = u + d_e', 'Location', 'northeast');
+% % ylim([-0.2 1]);
+% xlabel('time (s)');
+% ylabel('torque (N m)');
+% text(4.5,0.35,'d_e = 1.2 sin(t)');
+% title('Motor torque');
+% 
+% saveas(h1, 'Matlab plots\Testing P-STSMC hand-tuning 1.2.png');
 
 
 
