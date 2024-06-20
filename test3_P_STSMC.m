@@ -1,8 +1,6 @@
 clear all;
 clc;
 
-% addpath('Matlab plots\');
-% addpath('Matlab plots\Test 3');
 addpath('Matlab plots\Test 3\Hand-tuning');
 
 %% Model and simulation init
@@ -43,7 +41,8 @@ k2 = 10;
 k_pos = 5;
 
 
-%%
+%% Simulation of normal load
+
 % Normal load
 J_l = 8.31e-4;      % -- kg m^2
 driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
@@ -62,7 +61,7 @@ low = 8.31e-4 - (8.31e-4 * 0.1);
 high = 8.31e-4 + (8.31e-4 * 0.1);
 
 % Low load
-J_l = 7.48e-4;      % -- kg m^2     (-10%)
+J_l = low;      % -- kg m^2
 driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_low = driveTrain_sim.theta_r_out;
@@ -76,7 +75,7 @@ rmse_theta_low = sqrt(1/length(time_low) * sum(e_theta_low .^ 2));
 
 
 % High load
-J_l = 9.14e-4;      % -- kg m^2     (+10%)
+J_l = high;      % -- kg m^2
 driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_high = driveTrain_sim.theta_r_out;
@@ -107,7 +106,7 @@ ylim([-1 1]);
 xlabel('time (s)');
 ylabel('position (rad)');
 text(0.5,-0.3,['k1 = ' sprintf('%.3f', k1)]);
-text(0.5,-0.5,['k2 = ' sprintf('%.3f', k2)]);
+text(0.5,-0.5,['k2 = ' sprintf('%.2f', k2)]);
 text(0.5,-0.7,['k_pos = ' sprintf('%.2f', k_pos)]);
 title('Hand-tuned P-STSMC sine response');
 
@@ -143,10 +142,29 @@ title('Motor torque, u');
 
 saveas(h1, 'Matlab plots\Test 3\Hand-tuning\Test 3 P-STSMC hand-tuning all - 10 percent.png');
 
+
+h2 = figure(2);
+
+plot(time, abs(e_theta_high)*10^3, 'LineWidth', 1.5);
+hold on;
+plot(time, abs(e_theta)*10^3, '--', 'LineWidth', 1.5);
+hold on;
+plot(time, abs(e_theta_low)*10^3, ':', 'LineWidth', 1.5);
+hold off;
+grid on;
+legend('|e_\theta| with \theta_l = \theta_{l,low}', '|e_\theta| with \theta_l', '|e_\theta| with \theta_l = \theta_{l,high}', 'Location', 'northeast');
+xlabel('time (s)');
+ylabel('position error (mrad)');
+title('Position error, |e_\theta|', 'Interpreter', 'tex');
+
+saveas(h2, 'Matlab plots\Test 3\Hand-tuning\Test 3 e_theta P-STSMC hand-tuning - 10 percent.png');
+
 %% +/- 50 %
+low = 8.31e-4 - (8.31e-4 * 0.5);
+high = 8.31e-4 + (8.31e-4 * 0.5);
 
 % Low load
-J_l = 4.16e-4;      % -- kg m^2     (-50%)
+J_l = low;      % -- kg m^2
 driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_low = driveTrain_sim.theta_r_out;
@@ -160,7 +178,7 @@ rmse_theta_low = sqrt(1/length(time_low) * sum(e_theta_low .^ 2));
 
 
 % High load
-J_l = 0.0012;      % -- kg m^2     (+50%)
+J_l = high;      % -- kg m^2
 driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_high = driveTrain_sim.theta_r_out;
@@ -174,7 +192,7 @@ rmse_theta_high = sqrt(1/length(time_high) * sum(e_theta_high .^ 2));
 
 
 % Plotting
-h1 = figure(1);
+h3 = figure(3);
 
 subplot(2,2,[1 2]);
 plot(theta_l_timeseries_high, 'LineWidth', 1.5);
@@ -225,7 +243,7 @@ xlabel('time (s)');
 ylabel('torque (N m)');
 title('Motor torque, u');
 
-saveas(h1, 'Matlab plots\Test 3\Hand-tuning\Test 3 P-STSMC hand-tuning all - 50 percent.png');
+saveas(h3, 'Matlab plots\Test 3\Hand-tuning\Test 3 P-STSMC hand-tuning all - 50 percent.png');
 
 %%
 
