@@ -1,1 +1,0 @@
-# P-STSMC_hand-tuning
