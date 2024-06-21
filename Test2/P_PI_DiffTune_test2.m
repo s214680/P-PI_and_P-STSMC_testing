@@ -5,6 +5,7 @@ addpath('Plots');
 
 %% Model and simulation init
 % Frequency for reference sine wave
+% Frequency for reference sine wave
 xf = 1;
 
 % Parameters for drive train
@@ -34,10 +35,10 @@ x_0 = [0,0];
 x_l_0 = [0,0];
 
 % Controller gains
-% From hand-tuning
-k1 = 0.492;
-k2 = 10;
-k_pos = 5;
+% From DiffTune
+k1 = 1.779;
+k2 = 0.9926;
+k_pos = 4.213;
 
 %% J_l values
 J_l_orig = 8.31e-4; % -- kg m^2
@@ -57,7 +58,7 @@ J_l_h95 = J_l_orig + (J_l_orig * 0.95);
 %% Simulations
 % Normal load
 J_l = J_l_orig;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries = driveTrain_sim.theta_r_out;
 theta_l_timeseries = driveTrain_sim.theta_l_out;
@@ -69,7 +70,7 @@ e_theta = theta_r - theta_l;
 
 % Low load (-10 %)
 J_l = J_l_l10;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_l10 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_l10 = driveTrain_sim.theta_l_out;
@@ -82,7 +83,7 @@ rmse_theta_l10 = sqrt(1/length(time_l10) * sum(e_theta_l10 .^ 2));
 
 % High load (+10 %)
 J_l = J_l_h10;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_h10 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_h10 = driveTrain_sim.theta_l_out;
@@ -95,7 +96,7 @@ rmse_theta_h10 = sqrt(1/length(time_h10) * sum(e_theta_h10 .^ 2));
 
 % Low load (-50 %)
 J_l = J_l_l50;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_l50 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_l50 = driveTrain_sim.theta_l_out;
@@ -108,7 +109,7 @@ rmse_theta_l50 = sqrt(1/length(time_l50) * sum(e_theta_l50 .^ 2));
 
 % High load (+50 %)
 J_l = J_l_h50;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_h50 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_h50 = driveTrain_sim.theta_l_out;
@@ -121,7 +122,7 @@ rmse_theta_h50 = sqrt(1/length(time_h50) * sum(e_theta_h50 .^ 2));
 
 % Low load (-95 %)
 J_l = J_l_l95;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_l95 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_l95 = driveTrain_sim.theta_l_out;
@@ -134,7 +135,7 @@ rmse_theta_l95 = sqrt(1/length(time_l95) * sum(e_theta_l95 .^ 2));
 
 % High load (+95 %)
 J_l = J_l_h95;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_h95 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_h95 = driveTrain_sim.theta_l_out;
@@ -144,53 +145,6 @@ theta_r_h95 = theta_r_timeseries_h95.Data;
 theta_l_h95 = theta_l_timeseries_h95.Data;
 e_theta_h95 = theta_r_h95 - theta_l_h95;
 rmse_theta_h95 = sqrt(1/length(time_h95) * sum(e_theta_h95 .^ 2));
-
-%%
-% h1 = figure(1);
-% 
-% subplot(1,3,1);
-% 
-% plot(time, abs(e_theta_h10)*10^3, 'LineWidth', 1.5);
-% hold on;
-% plot(time, abs(e_theta)*10^3, '--', 'LineWidth', 1.5);
-% hold on;
-% plot(time, abs(e_theta_l10)*10^3, ':', 'LineWidth', 1.5);
-% hold off;
-% grid on;
-% legend('\theta_{l,high}', '\theta_l', '\theta_{l,low}', 'Location', 'northeast');
-% xlabel('time (s)');
-% ylabel('position error (mrad)');
-% title('Position error, |e_\theta|', 'Interpreter', 'tex');
-% 
-% subplot(1,3,2);
-% 
-% plot(time, abs(e_theta_h50)*10^3, 'LineWidth', 1.5);
-% hold on;
-% plot(time, abs(e_theta)*10^3, '--', 'LineWidth', 1.5);
-% hold on;
-% plot(time, abs(e_theta_l50)*10^3, ':', 'LineWidth', 1.5);
-% hold off;
-% grid on;
-% legend('\theta_{l,high}', '\theta_l', '\theta_{l,low}', 'Location', 'northeast');
-% xlabel('time (s)');
-% ylabel('position error (mrad)');
-% title('Position error, |e_\theta|', 'Interpreter', 'tex');
-% 
-% subplot(1,3,3);
-% 
-% plot(time, abs(e_theta_h95)*10^3, 'LineWidth', 1.5);
-% hold on;
-% plot(time, abs(e_theta)*10^3, '--', 'LineWidth', 1.5);
-% hold on;
-% plot(time, abs(e_theta_l95)*10^3, ':', 'LineWidth', 1.5);
-% hold off;
-% grid on;
-% legend('\theta_{l,high}', '\theta_l', '\theta_{l,low}', 'Location', 'northeast');
-% xlabel('time (s)');
-% ylabel('position error (mrad)');
-% title('Position error, |e_\theta|', 'Interpreter', 'tex');
-
-% saveas(h1, 'Plots\Test 3_Hand-tuned P-STSMC_position error.png');
 
 %%
 h1 = figure(1);
@@ -227,7 +181,7 @@ ylim([0 8]);
 xlabel('time (s)');
 ylabel('position error (mrad)');
 
-saveas(h1, 'Plots\Test 3_Hand-tuned P-STSMC_position error_all.png');
+saveas(h1, 'Plots\Test 3_DiffTune P-STSMC_position error_all.png');
 
 %%
 h2 = figure(2);
@@ -252,7 +206,7 @@ grid on;
 ylim([0 2]);
 xlabel('time (s)');
 ylabel('position error (mrad)');
-title('Hand-tuned P-STSMC: Position error, |e_\theta|', 'Interpreter', 'tex');
+title('DiffTune tuned P-STSMC: Position error, |e_\theta|', 'Interpreter', 'tex');
 
 subplot(3,2,[3 5]);
 plot(time, abs(e_theta)*10^3, 'DisplayName', 'J_l = 8.31e-4', 'LineWidth', 1.5);
@@ -286,6 +240,6 @@ ylim([0 8]);
 xlabel('time (s)');
 ylabel('position error (mrad)');
 
-saveas(h2, 'Plots\Test 3_Hand-tuning P-STSMC_position error_all_ver2.png');
+saveas(h2, 'Plots\Test 3_DiffTune P-STSMC_position error_all_ver2.png');
 
 

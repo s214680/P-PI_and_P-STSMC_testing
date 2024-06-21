@@ -5,6 +5,7 @@ addpath('Plots');
 
 %% Model and simulation init
 % Frequency for reference sine wave
+% Frequency for reference sine wave
 xf = 1;
 
 % Parameters for drive train
@@ -57,7 +58,7 @@ J_l_h95 = J_l_orig + (J_l_orig * 0.95);
 %% Simulations
 % Normal load
 J_l = J_l_orig;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries = driveTrain_sim.theta_r_out;
 theta_l_timeseries = driveTrain_sim.theta_l_out;
@@ -69,7 +70,7 @@ e_theta = theta_r - theta_l;
 
 % Low load (-10 %)
 J_l = J_l_l10;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_l10 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_l10 = driveTrain_sim.theta_l_out;
@@ -82,7 +83,7 @@ rmse_theta_l10 = sqrt(1/length(time_l10) * sum(e_theta_l10 .^ 2));
 
 % High load (+10 %)
 J_l = J_l_h10;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_h10 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_h10 = driveTrain_sim.theta_l_out;
@@ -95,7 +96,7 @@ rmse_theta_h10 = sqrt(1/length(time_h10) * sum(e_theta_h10 .^ 2));
 
 % Low load (-50 %)
 J_l = J_l_l50;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_l50 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_l50 = driveTrain_sim.theta_l_out;
@@ -108,7 +109,7 @@ rmse_theta_l50 = sqrt(1/length(time_l50) * sum(e_theta_l50 .^ 2));
 
 % High load (+50 %)
 J_l = J_l_h50;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_h50 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_h50 = driveTrain_sim.theta_l_out;
@@ -121,7 +122,7 @@ rmse_theta_h50 = sqrt(1/length(time_h50) * sum(e_theta_h50 .^ 2));
 
 % Low load (-95 %)
 J_l = J_l_l95;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_l95 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_l95 = driveTrain_sim.theta_l_out;
@@ -134,7 +135,7 @@ rmse_theta_l95 = sqrt(1/length(time_l95) * sum(e_theta_l95 .^ 2));
 
 % High load (+95 %)
 J_l = J_l_h95;
-driveTrain_sim = sim('driveTrain_P_STSMC_test2', 10);
+driveTrain_sim = sim('driveTrain_P_STSMC_test3', 10);
 
 theta_r_timeseries_h95 = driveTrain_sim.theta_r_out;
 theta_l_timeseries_h95 = driveTrain_sim.theta_l_out;
